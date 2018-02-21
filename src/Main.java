@@ -221,68 +221,87 @@ public class Main {
                                     System.out.println(sCurrLine.charAt(i));
 
                                     String param = "";
-                                    for (i++; sCurrLine.charAt(i) != ',' && sCurrLine.charAt(i) != ')'; i++){
-                                        param = param.concat(sCurrLine.charAt(i) + "");
-                                        System.out.println(sCurrLine.charAt(i) + " inserted");
+                                        for (i++; sCurrLine.charAt(i) != ',' && sCurrLine.charAt(i) != ')'; i++){
+                                            param = param.concat(sCurrLine.charAt(i) + "");
+                                            System.out.println(sCurrLine.charAt(i) + " inserted");
 
-                                    }
-                                    System.out.println("param: " + param);
-                                    param = param.trim();
+                                        }
+                                        System.out.println("param: " + param);
+                                        param = param.trim();
 
-                                    System.out.println(param.substring(0) + " idk");
-                                    boolean parameterType = false;
-                                    String parameter = "";
-                                    while (param.length() > 0 && param.charAt(0) != ' '){
-                                        parameter = parameter.concat(param.charAt(0) + "");
-                                        param = param.substring(1);
-                                    }
-
-                                    if (param.length() == 0 && sCurrLine.charAt(i) != ')'){
-                                        System.out.println("hello");
-                                        valid = false;
-                                        break;
-                                    }
-
-                                    System.out.println("param2: " + param);
-                                    System.out.println("parameter " + parameter);
-
-
-                                    parameter = parameter.trim();
-                                    for (String string : dataTypes) { //check if the parameter is valid
-                                        if (parameter.equals(string)){
-                                            parameterType = true;
+                                        if (param.length() == 0 && sCurrLine.charAt(i) != ')') {
+                                            System.out.println("Hmm. Something's not right.");
+                                            valid = false;
                                             break;
-                                        }else {
-                                            if (parameter.length() == 0){ //if no parameter
+                                        }
+
+                                        boolean parameterType = false;
+                                        String parameter = "";
+                                        while (param.length() > 0 && param.charAt(0) != ' '){
+                                            parameter = parameter.concat(param.charAt(0) + "");
+                                            param = param.substring(1);
+                                        }
+
+                                        parameter = parameter.trim();
+                                        for (String string : dataTypes) { //check if the parameter is valid
+                                            if (parameter.equals(string)){
                                                 parameterType = true;
                                                 break;
+                                            }else {
+                                                if (parameter.length() == 0){ //if no parameter
+                                                    parameterType = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                    String varName = "";
+                                    boolean notAllowed = false;
+
+                                    while (param.length() > 0){
+                                        if ((param.charAt(0) >= 'a' && param.charAt(0) <= 'z') || (param.charAt(0) >= 'A' && param.charAt(0) <= 'Z') || (param.charAt(0) >= '0' && param.charAt(0) <='9') || param.charAt(0) == '_' || param.charAt(0) == ' '){
+                                            varName = varName.concat(param.charAt(0) + "");
+                                            param = param.substring(1);
+                                        } else {
+                                            notAllowed = true;
+                                            break;
+                                        }
+                                    }
+
+                                    varName = varName.trim();
+                                    if (varName.length() > 0 && (varName.charAt(0) >= '0' && varName.charAt(0) <= '9')){
+                                        valid = false;
+                                        break;
+                                    } else {
+                                        if (!notAllowed){
+                                            for (String string : dataTypes){
+                                                if (string.equals(varName)){
+                                                    valid = false;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
 
+                                    if (notAllowed){
+                                        for (String string : dataTypes){
+                                            if (string.equals(varName)){
+                                                valid = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    
                                     if (!parameterType){
                                         System.out.println("error " + parameter);
                                         valid = false;
                                         break;
                                     }
-
-                                    if (param.length() > 0 && (param.charAt(1) >= '0' && param.charAt(1) <= '9')){
-                                        System.out.println("di pwede number");
-                                        valid = false;
-                                        break;
-                                    }
-
-                                    //param = param.trim();
-                                    for (String string : dataTypes){
-                                        if (string.equals(param)){
-                                            valid = false;
-                                            break;
-                                        }
-                                    }
                                 }
                             }
                         }
                     }
+                    
                 } else if (valid) { // TODO FUNCTION DEFINITION (Vince, start here)
                     System.out.println("Staring");
                     String funcName = sCurrLine.charAt(i) + "";
