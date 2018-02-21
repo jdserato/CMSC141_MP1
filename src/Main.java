@@ -173,6 +173,323 @@ public class Main {
                  *
                  */
                 if (valid && type == Type.VARIABLE_DECLARATION) { // TODO VARIABLE DECLARATION (Ruffa, start here)
+                    System.out.println("Variable dec here-->" + sCurrLine);
+                    String var_type = null;
+                    String var_name = null;
+                    String value = null;
+                    boolean extracted_type = false;
+                    boolean extracted_var = false;
+                    boolean extracted_value = false;
+                    boolean valid_type = true;
+                    boolean valid_name = true;
+                    boolean valid_value = true;
+                    boolean declaration = false;
+                    int new_index = 0;
+
+                    if(sCurrLine.contains("=")){
+                        if(sCurrLine.contains(",")){
+                            String [] array = new String[20];
+                            for(int index = 0; index < sCurrLine.length(); index++){
+                                //variable type
+                                while(!extracted_type){
+                                    if(sCurrLine.charAt(index) == ' '){
+                                        extracted_type = true;
+                                    }else{
+                                        if(sCurrLine.charAt(index) == ';'){
+                                            declaration = false;
+                                            break;
+                                        }else {
+                                            var_type = sCurrLine.substring(0, index + 1);
+                                            index++;
+                                        }
+                                    }
+                                }
+                                if(extracted_type){
+                                    valid_type = checkTypeIfValid(var_type);
+
+                                    if(valid_type){
+                                        int store_index  = index + 1;
+                                        new_index = store_index;
+                                        //variable name
+                                        int cntr = 0;
+                                        System.out.println(sCurrLine.charAt(new_index));
+                                        while(!extracted_var){
+                                            if(sCurrLine.charAt(new_index) == ';' ){
+                                                array[cntr] = var_name;
+                                                extracted_var = true;
+                                            }else{
+                                                if(sCurrLine.charAt(new_index) == ','){
+                                                    array[cntr] = var_name;
+                                                    cntr++;
+                                                    store_index = new_index+1;
+                                                    new_index++;
+                                                }else{
+                                                    var_name = sCurrLine.substring(store_index, new_index +1);
+                                                    new_index++;
+                                                }
+
+
+                                            }
+                                        }
+                                        if(extracted_var){
+                                            boolean separate;
+                                            int cntr2 = 0;
+                                            String value2 = null;
+                                            String temp;
+                                            for(int a = 0; a <= array.length; a++){
+                                                separate = false;
+                                                var_name = array[a];
+                                                if(var_name == null){
+                                                    break;
+                                                }
+                                                if(var_name.contains("=")){
+                                                    temp = var_name;
+                                                    while(!separate){
+                                                        if(temp.charAt(cntr2) == '='){
+                                                            var_name = temp.substring(0, cntr2);
+                                                            value2 = temp.substring(cntr2+1, temp.length());
+                                                            separate = true;
+                                                        }else{
+                                                            var_name = temp.substring(0, cntr2+1);
+                                                            cntr2++;
+                                                        }
+                                                    }
+                                                    valid_name = checkNameIfValid(var_name);
+                                                    valid_value = checkValueIfValid(var_type,value2);
+
+                                                    if(valid_name && valid_value){
+                                                        declaration = true;
+                                                    }else{
+                                                        declaration = false;
+                                                        break;
+                                                    }
+
+                                                }else{
+                                                    valid_name = checkNameIfValid(var_name);
+                                                    if(valid_name){
+                                                        declaration = true;
+                                                    }else{
+                                                        declaration = false;
+                                                        break;
+                                                    }
+                                                }
+
+
+                                            }
+
+                                            break;
+                                        }
+
+                                    }else{
+                                        declaration = false;
+                                    }
+
+
+                                }
+                            }
+
+                        }else{
+                            for(int index = 0; index < sCurrLine.length(); index++){
+                                //variable type
+                                while(!extracted_type){
+                                    if(sCurrLine.charAt(index) == ' '){
+                                        extracted_type = true;
+                                    }else{
+                                        if(sCurrLine.charAt(index) == ';'){
+                                            declaration = false;
+                                            break;
+                                        }else {
+                                            var_type = sCurrLine.substring(0, index + 1);
+                                            index++;
+                                        }
+                                    }
+                                }
+                                if(extracted_type){
+                                    int store_index = 0;
+                                    valid_type = checkTypeIfValid(var_type);
+                                    if(valid_type){
+                                        store_index  = index + 1;
+                                        new_index = store_index;
+                                        //variable name
+                                        while(!extracted_var){
+                                            if(sCurrLine.charAt(new_index) == '=' ){
+                                                extracted_var = true;
+                                            }else{
+                                                var_name = sCurrLine.substring(store_index, new_index +1);
+                                                new_index++;
+                                            }
+                                        }
+                                        if(extracted_var){
+                                            System.out.println("Variable name --->" + var_name);
+                                            valid_name = checkNameIfValid(var_name);
+                                            if(valid_name){
+                                                System.out.println(new_index);
+                                                store_index = new_index+1;
+                                                new_index = store_index;
+                                                while(!extracted_value){
+                                                    if(sCurrLine.charAt(new_index) == ';'){
+                                                        extracted_value = true;
+                                                    }else{
+                                                        value = sCurrLine.substring(store_index, new_index +1);
+                                                        new_index++;
+                                                    }
+
+                                                }
+                                                if(extracted_value){
+                                                    System.out.println("Variable value --->" + value);
+                                                    valid_value = checkValueIfValid(var_type, value);
+
+                                                    if(valid_value){
+
+                                                        declaration = true;
+
+                                                    }else{
+                                                        declaration = false;
+                                                    }
+                                                }
+
+                                            }else{
+                                                declaration = false;
+                                            }
+                                            break;
+                                        }
+
+                                    }else{
+                                        declaration = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+
+                    }else{
+
+                        String[] array = new String[20];
+                        if(sCurrLine.contains(",")){
+                            for(int index = 0; index < sCurrLine.length(); index++){
+                                //variable type
+                                while(!extracted_type){
+                                    if(sCurrLine.charAt(index) == ' '){
+                                        extracted_type = true;
+                                    }else{
+                                        if(sCurrLine.charAt(index) == ';'){
+                                            declaration = false;
+                                            break;
+                                        }else {
+                                            var_type = sCurrLine.substring(0, index + 1);
+                                            index++;
+                                        }
+                                    }
+                                }
+                                if(extracted_type){
+                                    valid_type = checkTypeIfValid(var_type);
+
+                                    if(valid_type){
+                                        int store_index  = index + 1;
+                                        new_index = store_index;
+                                        //variable name
+                                        int cntr = 0;
+                                        System.out.println(sCurrLine.charAt(new_index));
+                                        while(!extracted_var){
+                                            if(sCurrLine.charAt(new_index) == ';' ){
+                                                array[cntr] = var_name;
+                                                extracted_var = true;
+                                            }else{
+                                                if(sCurrLine.charAt(new_index) == ','){
+                                                    array[cntr] = var_name;
+                                                    cntr++;
+                                                    store_index = new_index+1;
+                                                    new_index++;
+                                                }else{
+                                                    var_name = sCurrLine.substring(store_index, new_index +1);
+                                                    new_index++;
+                                                }
+
+
+                                            }
+                                        }
+                                        if(extracted_var){
+                                            for(int a = 0; a <= cntr; a++){
+                                                var_name = array[a];
+                                                System.out.println("Variable name --->" + var_name);
+                                                valid_name = checkNameIfValid(var_name);
+                                                if(valid_name){
+                                                    declaration = true;
+                                                }else{
+                                                    declaration = false;
+                                                }
+
+                                            }
+
+
+                                            break;
+                                        }
+
+                                    }else{
+                                        declaration = false;
+                                    }
+
+
+                                }
+                            }
+
+
+                        }else{
+                            for(int index = 0; index < sCurrLine.length(); index++){
+                                //variable type
+                                while(!extracted_type){
+                                    if(sCurrLine.charAt(index) == ' '){
+                                        extracted_type = true;
+                                    }else{
+                                        if(sCurrLine.charAt(index) == ';'){
+                                            declaration = false;
+                                            break;
+                                        }else {
+                                            var_type = sCurrLine.substring(0, index + 1);
+                                            index++;
+                                        }
+                                    }
+                                }
+                                if(extracted_type){
+                                    valid_type = checkTypeIfValid(var_type);
+
+                                    if(valid_type){
+                                        int store_index  = index + 1;
+                                        new_index = store_index;
+                                        //variable name
+                                        while(!extracted_var){
+                                            if(sCurrLine.charAt(new_index) == ';' ){
+                                                extracted_var = true;
+                                            }else{
+                                                var_name = sCurrLine.substring(store_index, new_index +1);
+                                                new_index++;
+                                            }
+                                        }
+                                        if(extracted_var){
+                                            System.out.println("Variable name --->" + var_name);
+                                            valid_name = checkNameIfValid(var_name);
+                                            if(valid_name){
+                                                declaration = true;
+                                            }else{
+                                                declaration = false;
+                                            }
+                                            break;
+                                        }
+
+                                    }else{
+                                        declaration = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                    if (declaration) {
+                        valid = true;
+                    } else { valid = false;
+                    }
 
                 } else if (valid && type == Type.FUNCTION_DECLARATION) { // TODO FUNCTION DECLARATION (MM, start here)
                     System.out.println("nisulod sa function declaration");
@@ -1066,7 +1383,374 @@ public class Main {
             }
         }
     }
+    //check if the declared value is valid
+    private static boolean checkValueIfValid(String type, String value){
+        boolean isValid = false;
+        if(value == null){
+            isValid = false;
+        }else {
+            boolean not_empty = false;
+            for(int i = 0; i < value.length(); i++){
+                if(value.charAt(i)!= ' '){
+                    not_empty = true;
+                }
+            }
+            if(not_empty){
+                int s = 0;
+                if (value.charAt(0) == ' ') {
+                    while (value.charAt(s) == ' ') {
+                        s++;
+                    }
+                    value = value.substring(s, value.length());
+                }
+                System.out.println("New value-->" + value);
+                int z = value.length() - 1;
+                if (value.charAt(z) == ' ') {
+                    while (value.charAt(z) == ' ') {
+                        z--;
+                    }
+                    value = value.substring(0, z + 1);
 
+                }
+
+                if (type.equals("int")) {
+                    if (value.contains("'")) {
+                        if (value.length() == 3 && value.charAt(0) == '\'') {
+                            if(value.charAt(2) == '\''){
+                                isValid = true;
+                            }else{
+                                isValid = false;
+                            }
+                        } else {
+                            isValid = false;
+                        }
+                    } else {
+                        if(value.length() == 1){
+                            if(value.charAt(0) == '-'){
+                                isValid = false;
+                            }else{
+                                if(value.charAt(0) >= '0' && value.charAt(0) <= '9'){
+                                    isValid = true;
+                                }else{
+                                    isValid = false;
+                                }
+                            }
+
+                        }else{
+
+                            if(value.charAt(0) == '-'){
+                                int i = 1;
+                                boolean not_space = true;
+                                while(not_space){
+                                    if(value.charAt(i) != ' '){
+                                        value = value.substring(i, value.length());
+                                        not_space = false;
+                                    }else{
+                                        i++;
+                                    }
+                                }
+                                for(int j = 0; j < value.length(); j++){
+                                    if(value.charAt(j) >= '0' && value.charAt(j) <= '9'){
+                                        isValid = true;
+                                    }else{
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                                if(isValid){
+                                    value = "-" + value;
+                                }
+                            }else{
+                                for(int i = 0; i < value.length(); i++){
+                                    if(value.charAt(i) >= '0' && value.charAt(i) <= '9'){
+                                        isValid = true;
+                                    }else{
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                } else if (type.equals("float")) {
+                    if (value.contains("'")) {
+                        if (value.length() == 3 && value.charAt(0) == '\'') {
+                            if(value.charAt(2) == '\''){
+                                isValid = true;
+                            }else{
+                                isValid = false;
+                            }
+                        } else {
+                            isValid = false;
+                        }
+                    } else {
+                        int cnt = 0;
+                        for (int i = 0; i < value.length(); i++) {
+                            if (value.charAt(i) == '.') {
+                                cnt++;
+                            }
+                        }
+
+                        if (cnt > 1) {
+                            return false;
+                        } else {
+                            if(value.charAt(0) == '-'){
+                                int i = 1;
+                                boolean not_space = true;
+                                while(not_space){
+                                    if(value.charAt(i) != ' '){
+                                        value = value.substring(i, value.length());
+                                        not_space = false;
+                                    }else{
+                                        i++;
+                                    }
+                                }
+                                for(int j = 0; j < value.length(); j++){
+                                    if((value.charAt(j) >= '0' && value.charAt(j) <= '9') || value.charAt(j) == '.'){
+                                        isValid = true;
+                                    }else{
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                                if(isValid){
+                                    value = "-" + value;
+                                }
+                            }else {
+                                for (int i = 0; i < value.length(); i++) {
+                                    if ((value.charAt(i) >= '0' && value.charAt(i) <= '9') || value.charAt(i) == '.') {
+                                        isValid = true;
+                                    } else {
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+
+                } else if (type.equals("char")) {
+                    if (value.contains("'")){
+                        if((value.length() == 3) && (value.charAt(0) == '\'')){
+                            if(value.charAt(2) == '\''){
+                                isValid = true;
+                            } else{
+                                isValid = false;
+                            }
+                        }else{
+                            isValid = false;
+                        }
+                    }else{
+                        for(int i = 0; i < value.length(); i++){
+                            if(value.charAt(i) >= '0' && value.charAt(i) <= '9'){
+                                isValid = true;
+                            }else{
+                                isValid = false;
+                                break;
+                            }
+                        }
+                    }
+
+                } else { //means it's a double type
+                    if (value.contains("'")) {
+                        if (value.length() == 3 && value.charAt(0) == '\'') {
+                            if(value.charAt(2) == '\''){
+                                isValid = true;
+                            }else{
+                                isValid = false;
+                            }
+                        } else {
+                            isValid = false;
+                        }
+                    } else {
+                        int cnt = 0;
+                        for (int i = 0; i < value.length(); i++) {
+                            if (value.charAt(i) == '.') {
+                                cnt++;
+                            }
+                        }
+
+                        if (cnt > 1) {
+                            return false;
+                        } else {
+                            if(value.charAt(0) == '-'){
+                                int i = 1;
+                                boolean not_space = true;
+                                while(not_space){
+                                    if(value.charAt(i) != ' '){
+                                        value = value.substring(i, value.length());
+                                        not_space = false;
+                                    }else{
+                                        i++;
+                                    }
+                                }
+                                for(int j = 0; j < value.length(); j++){
+                                    if((value.charAt(j) >= '0' && value.charAt(j) <= '9') || value.charAt(j) == '.'){
+                                        isValid = true;
+                                    }else{
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                                if(isValid){
+                                    value = "-" + value;
+                                }
+                            }else {
+                                for (int i = 0; i < value.length(); i++) {
+                                    if ((value.charAt(i) >= '0' && value.charAt(i) <= '9') || value.charAt(i) == '.') {
+                                        isValid = true;
+                                    } else {
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+
+                }
+            }else{
+                isValid = false;
+            }
+
+
+        }
+        System.out.println("New value-->" + value);
+        if(!(type.equals("char"))){
+            if(isValid){
+                isValid = checkRangeIfValid(type, value);
+            }
+        }
+
+        return isValid;
+    }
+    private static boolean checkRangeIfValid(String type, String value){
+        int isInteger;
+        float isFloat;
+        double isDouble;
+        //try catch
+        if (value.contains("'")) {
+            if (value.length() == 3 && value.charAt(0) == '\'') {
+                if(value.charAt(2) == '\''){
+                    return true;
+                }else{
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        else{
+            if(type.equals("int")){
+                try {
+                    isInteger = Integer.parseInt(value);
+                    return true;
+                }catch  (Exception e){
+                    System.out.println("Error: " + e);
+                    return false;
+                }
+
+            }else if(type.equals("float")){
+                try {
+                    isFloat = Float.parseFloat(value);
+                    return true;
+                }catch  (Exception e){
+                    System.out.println("Error: " + e);
+                    return false;
+                }
+            }else { //double
+                try {
+                    isDouble = Double.parseDouble(value);
+                    return true;
+                }catch  (Exception e){
+                    System.out.println("Error: " + e);
+                    return false;
+                }
+            }
+        }
+
+
+    }
+    //check if the declared type is valid
+    private static boolean checkTypeIfValid(String type){
+        if(type.equals("int")){
+            return true;
+        }else if(type.equals("float")){
+            return true;
+        }else if(type.equals("char")){
+            return true;
+        }else if(type.equals("double")){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    //check if the declared variable name is valid
+    private static boolean checkNameIfValid(String name){
+        boolean isValid = false;
+        if(name == null){
+            isValid = false;
+        }else {
+            boolean not_empty = false;
+            for(int i = 0; i < name.length(); i++){
+                if(name.charAt(i)!= ' '){
+                    not_empty = true;
+                }
+            }if(not_empty){
+                int s = 0;
+
+                if (name.charAt(0) == ' ') {
+                    while (name.charAt(s) == ' ') {
+                        s++;
+                    }
+                    name = name.substring(s, name.length());
+                }
+                System.out.println("New var name-->" + name);
+                int z = name.length() - 1;
+                if (name.charAt(z) == ' ') {
+                    while (name.charAt(z) == ' ') {
+                        z--;
+                    }
+                    name = name.substring(0, z + 1);
+
+                }
+                System.out.println("New var name-->" + name);
+                if(!((name.equals("int")) || (name.equals("float")) || (name.equals("double") || (name.equals("char"))))){
+                    for (int i = 0; i < name.length(); i++) {
+                        if (i == 0) {
+                            if ((name.charAt(i) >= 'a' && name.charAt(i) <= 'z') || (name.charAt(i) >= 'A' && name.charAt(i) <= 'Z') || (name.charAt(i) == '_')) {
+                                isValid = true;
+                            } else {
+                                isValid = false;
+                                break;
+                            }
+                        } else {
+                            if ((name.charAt(i) >= 'a' && name.charAt(i) <= 'z') || (name.charAt(i) >= 'A' && name.charAt(i) <= 'Z') || (name.charAt(i) == '_') || (name.charAt(i) >= '0' && name.charAt(i) <= '9')) {
+                                isValid = true;
+                            } else {
+                                isValid = false;
+                                break;
+                            }
+                        }
+
+                    }
+                }else{
+                    isValid = false;
+                }
+
+            }else{
+                isValid = false;
+            }
+        }
+        return isValid;
+    }
     private static void terminate() {
         try {
             valid = false;
