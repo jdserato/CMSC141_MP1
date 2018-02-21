@@ -1,12 +1,12 @@
-2
-void disp ( int x, int y){
-    int int =                    'a'  +    'e'            ;
-    x11 = 'a'
-    + 'e' +
-
-
-     'i'
-     + 48 / '0';    return y +
-    'a'   ;
+6
+int x, y, z = 10;
+double a
+int function();
+int func(int){
+int x = 10;
 }
-int kurwa (int, int, int, float float, int){}
+int square(int x){
+    return x * x;
+}
+INT function2(void);
+int solve(int,char,double x,float,int,int);
