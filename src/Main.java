@@ -23,7 +23,7 @@ public class Main {
         List<String> fDef_DeclVar;
 
         try {
-            // Putting the input and output files in a buffered reader and writer respectively.
+            // Putting the INPUT and output files in a buffered reader and writer respectively.
             br = new BufferedReader(new FileReader(INPUT_FILE));
             wr = new BufferedWriter(new FileWriter(OUTPUT_FILE));
 
@@ -31,9 +31,8 @@ public class Main {
             try {
                 types = Integer.parseInt(br.readLine());
             } catch (InputMismatchException e) {
-                System.err.println(e.getMessage());
+                // do nothing
             }
-            System.out.println(types);
             while (--types >= 0) {
                 type = null;
                 fDef_DeclVar = new ArrayList<>();
@@ -47,7 +46,6 @@ public class Main {
                         sCurrLine = sCurrLine.concat(" ");
                         readLine = br.readLine();
                     }
-                    System.out.println(readLine + " and " + sCurrLine + " where readline is " + readLine.length());
 
                     while (readLine.length() > 0) {
                         sCurrLine = sCurrLine.concat(readLine.charAt(0) + "");
@@ -62,18 +60,11 @@ public class Main {
 
                 } while (testCaseSearch);
 
-                // FIXME eliminate debug (all sout)
-                wr.append(String.valueOf(types));
-                System.out.println(types + "");
-                wr.newLine();
-
                 sCurrLine = sCurrLine.trim(); // Removing redundant spaces, if any are present
-                System.out.println("TESTCASE: " + sCurrLine);
                 // Checking its type whether its a variable declaration, a function declaration, or function definition.
                 if (sCurrLine.charAt(sCurrLine.length() - 1) == ';') { // The type is either a variable or a function declaration.
                     if (sCurrLine.contains("(") && sCurrLine.contains(")")) { // The type is likely a function declaration.
                         type = Type.FUNCTION_DECLARATION;
-                        System.out.println("The type is a valid function declaration.");
                         String name = "";
                         boolean space = false;
                         for (int i = 0; i < sCurrLine.length(); i++) {
@@ -85,7 +76,6 @@ public class Main {
                                 name = name.concat(sCurrLine.charAt(i) + "");
                             } else if (sCurrLine.charAt(i) == '(') {
                                 name = name.trim();
-                                System.out.println(name + " is name");
                                 if (name.contains(" ")) {
                                     valid = false;
                                     while (name.charAt(0) != ' ') {
@@ -98,7 +88,6 @@ public class Main {
                                             break;
                                         }
                                     }
-                                    System.out.println(name + " is rev name");
                                     for (String s : dataTypes) {
                                         if (s.equals(name)) {
                                             type = Type.VARIABLE_DECLARATION;
@@ -112,11 +101,9 @@ public class Main {
                         }
                     } else { // The type is likely a variable declaration.
                         type = Type.VARIABLE_DECLARATION;
-                        System.out.println("The type is a valid variable declaration.");
                     }
                 } else if (sCurrLine.contains("(") && sCurrLine.contains(")") && sCurrLine.charAt(sCurrLine.length() - 1) == '{') { // The type is likely a function declaration.
                     type = Type.FUNCTION_DEFINITION;
-                    System.out.println("The type is a valid function definition.");
                 } else { // Preliminary test: INVALID
                     valid = false;
                     wr.append("INVALID ");
@@ -138,7 +125,6 @@ public class Main {
                 for (i = 0; i < sCurrLine.length() && sCurrLine.charAt(i) != ' '; i++) {
                     returnType = returnType.concat(sCurrLine.charAt(i) + "");
                 }
-                System.out.println(returnType);
                 boolean validRetType = false;
                 for (String s : dataTypes) {
                     if (returnType.equals(s)) {
@@ -153,11 +139,10 @@ public class Main {
                 }
 
                 if (!validRetType) {
-                    System.out.println("type is invalid.");
                     if (type == Type.FUNCTION_DEFINITION) {
                         terminate();
                     } else {
-                        wr.append("INVALID ").append(type.toString());
+                        //wr.append("INVALID ").append(type.toString());
                         valid = false;
                     }
                 }
@@ -173,43 +158,343 @@ public class Main {
                  *
                  */
                 if (valid && type == Type.VARIABLE_DECLARATION) { // TODO VARIABLE DECLARATION (Ruffa, start here)
+                    String var_type = null;
+                    String var_name = null;
+                    String value = null;
+                    boolean extracted_type = false;
+                    boolean extracted_var = false;
+                    boolean extracted_value = false;
+                    boolean valid_type = true;
+                    boolean valid_name = true;
+                    boolean valid_value = true;
+                    boolean declaration = false;
+                    int new_index = 0;
 
+                    if(sCurrLine.contains("=")){
+                        if(sCurrLine.contains(",")){
+                            String [] array = new String[20];
+                            for(int index = 0; index < sCurrLine.length(); index++){
+                                //variable type
+                                while(!extracted_type){
+                                    if(sCurrLine.charAt(index) == ' '){
+                                        extracted_type = true;
+                                    }else{
+                                        if(sCurrLine.charAt(index) == ';'){
+                                            declaration = false;
+                                            break;
+                                        }else {
+                                            var_type = sCurrLine.substring(0, index + 1);
+                                            index++;
+                                        }
+                                    }
+                                }
+                                if(extracted_type){
+                                    valid_type = checkTypeIfValid(var_type);
+
+                                    if(valid_type){
+                                        int store_index  = index + 1;
+                                        new_index = store_index;
+                                        //variable name
+                                        int cntr = 0;
+                                        while(!extracted_var){
+                                            if(sCurrLine.charAt(new_index) == ';' ){
+                                                array[cntr] = var_name;
+                                                extracted_var = true;
+                                            }else{
+                                                if(sCurrLine.charAt(new_index) == ','){
+                                                    array[cntr] = var_name;
+                                                    cntr++;
+                                                    store_index = new_index+1;
+                                                    new_index++;
+                                                }else{
+                                                    var_name = sCurrLine.substring(store_index, new_index +1);
+                                                    new_index++;
+                                                }
+
+
+                                            }
+                                        }
+                                        if(extracted_var){
+                                            boolean separate;
+                                            int cntr2 = 0;
+                                            String value2 = null;
+                                            String temp;
+                                            for(int a = 0; a <= array.length; a++){
+                                                separate = false;
+                                                var_name = array[a];
+                                                if(var_name == null){
+                                                    break;
+                                                }
+                                                if(var_name.contains("=")){
+                                                    temp = var_name;
+                                                    while(!separate){
+                                                        if(temp.charAt(cntr2) == '='){
+                                                            var_name = temp.substring(0, cntr2);
+                                                            value2 = temp.substring(cntr2+1, temp.length());
+                                                            separate = true;
+                                                        }else{
+                                                            var_name = temp.substring(0, cntr2+1);
+                                                            cntr2++;
+                                                        }
+                                                    }
+                                                    valid_name = checkNameIfValid(var_name);
+                                                    valid_value = checkValueIfValid(var_type,value2);
+
+                                                    if(valid_name && valid_value){
+                                                        declaration = true;
+                                                    }else{
+                                                        declaration = false;
+                                                        break;
+                                                    }
+
+                                                }else{
+                                                    valid_name = checkNameIfValid(var_name);
+                                                    if(valid_name){
+                                                        declaration = true;
+                                                    }else{
+                                                        declaration = false;
+                                                        break;
+                                                    }
+                                                }
+
+
+                                            }
+
+                                            break;
+                                        }
+
+                                    }else{
+                                        declaration = false;
+                                    }
+
+
+                                }
+                            }
+
+                        }else{
+                            for(int index = 0; index < sCurrLine.length(); index++){
+                                //variable type
+                                while(!extracted_type){
+                                    if(sCurrLine.charAt(index) == ' '){
+                                        extracted_type = true;
+                                    }else{
+                                        if(sCurrLine.charAt(index) == ';'){
+                                            declaration = false;
+                                            break;
+                                        }else {
+                                            var_type = sCurrLine.substring(0, index + 1);
+                                            index++;
+                                        }
+                                    }
+                                }
+                                if(extracted_type){
+                                    int store_index = 0;
+                                    valid_type = checkTypeIfValid(var_type);
+                                    if(valid_type){
+                                        store_index  = index + 1;
+                                        new_index = store_index;
+                                        //variable name
+                                        while(!extracted_var){
+                                            if(sCurrLine.charAt(new_index) == '=' ){
+                                                extracted_var = true;
+                                            }else{
+                                                var_name = sCurrLine.substring(store_index, new_index +1);
+                                                new_index++;
+                                            }
+                                        }
+                                        if(extracted_var){
+                                            valid_name = checkNameIfValid(var_name);
+                                            if(valid_name){
+                                                store_index = new_index+1;
+                                                new_index = store_index;
+                                                while(!extracted_value){
+                                                    if(sCurrLine.charAt(new_index) == ';'){
+                                                        extracted_value = true;
+                                                    }else{
+                                                        value = sCurrLine.substring(store_index, new_index +1);
+                                                        new_index++;
+                                                    }
+
+                                                }
+                                                if(extracted_value){
+                                                    valid_value = checkValueIfValid(var_type, value);
+
+                                                    if(valid_value){
+
+                                                        declaration = true;
+
+                                                    }else{
+                                                        declaration = false;
+                                                    }
+                                                }
+
+                                            }else{
+                                                declaration = false;
+                                            }
+                                            break;
+                                        }
+
+                                    }else{
+                                        declaration = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+
+                    }else{
+
+                        String[] array = new String[20];
+                        if(sCurrLine.contains(",")){
+                            for(int index = 0; index < sCurrLine.length(); index++){
+                                //variable type
+                                while(!extracted_type){
+                                    if(sCurrLine.charAt(index) == ' '){
+                                        extracted_type = true;
+                                    }else{
+                                        if(sCurrLine.charAt(index) == ';'){
+                                            declaration = false;
+                                            break;
+                                        }else {
+                                            var_type = sCurrLine.substring(0, index + 1);
+                                            index++;
+                                        }
+                                    }
+                                }
+                                if(extracted_type){
+                                    valid_type = checkTypeIfValid(var_type);
+
+                                    if(valid_type){
+                                        int store_index  = index + 1;
+                                        new_index = store_index;
+                                        //variable name
+                                        int cntr = 0;
+                                        while(!extracted_var){
+                                            if(sCurrLine.charAt(new_index) == ';' ){
+                                                array[cntr] = var_name;
+                                                extracted_var = true;
+                                            }else{
+                                                if(sCurrLine.charAt(new_index) == ','){
+                                                    array[cntr] = var_name;
+                                                    cntr++;
+                                                    store_index = new_index+1;
+                                                    new_index++;
+                                                }else{
+                                                    var_name = sCurrLine.substring(store_index, new_index +1);
+                                                    new_index++;
+                                                }
+
+
+                                            }
+                                        }
+                                        if(extracted_var){
+                                            for(int a = 0; a <= cntr; a++){
+                                                var_name = array[a];
+                                                valid_name = checkNameIfValid(var_name);
+                                                if(valid_name){
+                                                    declaration = true;
+                                                }else{
+                                                    declaration = false;
+                                                }
+
+                                            }
+
+
+                                            break;
+                                        }
+
+                                    }else{
+                                        declaration = false;
+                                    }
+
+
+                                }
+                            }
+
+
+                        }else{
+                            for(int index = 0; index < sCurrLine.length(); index++){
+                                //variable type
+                                while(!extracted_type){
+                                    if(sCurrLine.charAt(index) == ' '){
+                                        extracted_type = true;
+                                    }else{
+                                        if(sCurrLine.charAt(index) == ';'){
+                                            declaration = false;
+                                            break;
+                                        }else {
+                                            var_type = sCurrLine.substring(0, index + 1);
+                                            index++;
+                                        }
+                                    }
+                                }
+                                if(extracted_type){
+                                    valid_type = checkTypeIfValid(var_type);
+
+                                    if(valid_type){
+                                        int store_index  = index + 1;
+                                        new_index = store_index;
+                                        //variable name
+                                        while(!extracted_var){
+                                            if(sCurrLine.charAt(new_index) == ';' ){
+                                                extracted_var = true;
+                                            }else{
+                                                var_name = sCurrLine.substring(store_index, new_index +1);
+                                                new_index++;
+                                            }
+                                        }
+                                        if(extracted_var){
+                                            valid_name = checkNameIfValid(var_name);
+                                            if(valid_name){
+                                                declaration = true;
+                                            }else{
+                                                declaration = false;
+                                            }
+                                            break;
+                                        }
+
+                                    }else{
+                                        declaration = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                    if (declaration) {
+                        valid = true;
+                    } else { valid = false;
+                    }
                 } else if (valid && type == Type.FUNCTION_DECLARATION) { // TODO FUNCTION DECLARATION (MM, start here)
-                    System.out.println("nisulod sa function declaration");
 
                     for (; sCurrLine.charAt(i) == ' '; i++);
 
                     if (!(sCurrLine.charAt(i) == '_' || (sCurrLine.charAt(i) >= 'A' && sCurrLine.charAt(i) <= 'Z') || (sCurrLine.charAt(i) >= 'a' && sCurrLine.charAt(i) <= 'z'))) {
                         //terminate(type);
                         valid = false;
-                        System.out.println("Naming deficiency at first letter.");
                     } else {
                         String functionName = sCurrLine.charAt(i) + ""; //istore sa functionName ang kana na character
 
                         for (i++; sCurrLine.charAt(i) != '(' && sCurrLine.charAt(i) != ' '; i++) { //name ra jud ni sa function way apil ang after sa parenthesis
                             if (sCurrLine.charAt(i) == '_' || (sCurrLine.charAt(i) >= 'A' && sCurrLine.charAt(i) <= 'Z') || (sCurrLine.charAt(i) >= 'a' && sCurrLine.charAt(i) <= 'z') || (sCurrLine.charAt(i) >= '0' && sCurrLine.charAt(i) <= '9')) {
                                 functionName = functionName.concat(sCurrLine.charAt(i) + "");
-                                //System.out.println("mm " + functionName);
                             } else {
-                                System.out.println("Naming deficiency at next letters: " + sCurrLine.charAt(i));
                                 //terminate(type);
                                 valid = false;
                                 break;
                             }
-                            //System.out.println(i);
                         }
 
                         //mana ko here
                         if (valid) { //valid ang pag name sa function;
-                            System.out.println("Function name cleared.");
                             for (; sCurrLine.charAt(i) != '('; i++){
                                 if (i + 1 == sCurrLine.length()) {
-                                    System.out.println("invalid");
                                     //terminate(type);
                                     valid = false;
                                     break;
                                 } else if (sCurrLine.charAt(i) != ' ') {
-                                    System.out.println("Invalid function name.");
                                     //terminate(type);
                                     valid = false;
                                     break;
@@ -218,34 +503,25 @@ public class Main {
 
                             if (valid){ //ang scurrLine kay naa na sa (
                                 while (sCurrLine.charAt(i) != ')'){
-                                    System.out.println(sCurrLine.charAt(i));
 
                                     String param = "";
                                     for (i++; sCurrLine.charAt(i) != ',' && sCurrLine.charAt(i) != ')'; i++){
                                         param = param.concat(sCurrLine.charAt(i) + "");
-                                        System.out.println(sCurrLine.charAt(i) + " inserted");
 
                                     }
-                                    System.out.println("param: " + param);
                                     param = param.trim();
 
-                                    System.out.println(param.substring(0) + " idk");
+                                    if (param.length() == 0 && sCurrLine.charAt(i) != ')') {
+                                        valid = false;
+                                        break;
+                                    }
+
                                     boolean parameterType = false;
                                     String parameter = "";
                                     while (param.length() > 0 && param.charAt(0) != ' '){
                                         parameter = parameter.concat(param.charAt(0) + "");
                                         param = param.substring(1);
                                     }
-
-                                    if (param.length() == 0 && sCurrLine.charAt(i) != ')'){
-                                        System.out.println("hello");
-                                        valid = false;
-                                        break;
-                                    }
-
-                                    System.out.println("param2: " + param);
-                                    System.out.println("parameter " + parameter);
-
 
                                     parameter = parameter.trim();
                                     for (String string : dataTypes) { //check if the parameter is valid
@@ -260,37 +536,57 @@ public class Main {
                                         }
                                     }
 
-                                    if (!parameterType){
-                                        System.out.println("error " + parameter);
-                                        valid = false;
-                                        break;
-                                    }
+                                    String varName = "";
+                                    boolean notAllowed = false;
 
-                                    if (param.length() > 0 && (param.charAt(1) >= '0' && param.charAt(1) <= '9')){
-                                        System.out.println("di pwede number");
-                                        valid = false;
-                                        break;
-                                    }
-
-                                    //param = param.trim();
-                                    for (String string : dataTypes){
-                                        if (string.equals(param)){
-                                            valid = false;
+                                    while (param.length() > 0){
+                                        if ((param.charAt(0) >= 'a' && param.charAt(0) <= 'z') || (param.charAt(0) >= 'A' && param.charAt(0) <= 'Z') || (param.charAt(0) >= '0' && param.charAt(0) <='9') || param.charAt(0) == '_' || param.charAt(0) == ' '){
+                                            varName = varName.concat(param.charAt(0) + "");
+                                            param = param.substring(1);
+                                        } else {
+                                            notAllowed = true;
                                             break;
                                         }
+                                    }
+
+                                    varName = varName.trim();
+                                    if (varName.length() > 0 && (varName.charAt(0) >= '0' && varName.charAt(0) <= '9')){
+                                        valid = false;
+                                        break;
+                                    } else {
+                                        if (!notAllowed){
+                                            for (String string : dataTypes){
+                                                if (string.equals(varName)){
+                                                    valid = false;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (notAllowed){
+                                        for (String string : dataTypes){
+                                            if (string.equals(varName)){
+                                                valid = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    if (!parameterType){
+                                        valid = false;
+                                        break;
                                     }
                                 }
                             }
                         }
                     }
                 } else if (valid) { // TODO FUNCTION DEFINITION (Vince, start here)
-                    System.out.println("Staring");
                     String funcName = sCurrLine.charAt(i) + "";
                     // Inspecting function/variable name
                     for (; sCurrLine.charAt(i) == ' '; i++);
                     if (!(sCurrLine.charAt(i) == '_' || (sCurrLine.charAt(i) >= 'A' && sCurrLine.charAt(i) <= 'Z') || (sCurrLine.charAt(i) >= 'a' && sCurrLine.charAt(i) <= 'z'))) {
                         terminate();
-                        System.out.println("Naming deficiency at first letter.");
                     } else {
                         String funcDefName = sCurrLine.charAt(i) + "";
                         for (i++; sCurrLine.charAt(i) != '(' && sCurrLine.charAt(i) != ' '; i++) {
@@ -298,7 +594,6 @@ public class Main {
                             if (sCurrLine.charAt(i) == '_' || (sCurrLine.charAt(i) >= 'A' && sCurrLine.charAt(i) <= 'Z') || (sCurrLine.charAt(i) >= 'a' && sCurrLine.charAt(i) <= 'z') || (sCurrLine.charAt(i) >= '0' && sCurrLine.charAt(i) <= '9')) {
                                 funcDefName = funcDefName.concat(sCurrLine.charAt(i) + "");
                             } else {
-                                System.out.println("Naming deficiency at next letters: " + sCurrLine.charAt(i));
                                 terminate();
                                 break;
                             }
@@ -311,31 +606,31 @@ public class Main {
                                 }
                             }
                             if (!valid || funcName.equals("void")) {
-                                System.out.println("Invalid name.");
                                 terminate();
                             }
-                            System.out.println("Function name cleared : " + funcName);
                             for (; sCurrLine.charAt(i) != '('; i++){
                                 if (i + 1 == sCurrLine.length()) {
-                                    System.out.println("EOF");
                                     terminate();
                                     break;
                                 } else if (sCurrLine.charAt(i) != ' ') {
-                                    System.out.println("Invalid function name.");
                                     terminate();
                                     break;
                                 }
                             }
                             if (valid) {
+                                i++;
                                 while (sCurrLine.charAt(i) != ')') {
                                     String param = "";
-                                    for (i++; sCurrLine.charAt(i) != ',' && sCurrLine.charAt(i) != ')'; i++) {
+                                    boolean comma = false;
+                                    if (sCurrLine.charAt(i) == ',') {
+                                        i++;
+                                        comma = true;
+                                    }
+                                    for (; sCurrLine.charAt(i) != ',' && sCurrLine.charAt(i) != ')'; i++) {
                                         param = param.concat(sCurrLine.charAt(i) + "");
-                                        System.out.println(sCurrLine.charAt(i) + " inserted");
                                     }
                                     param = param.trim();
-                                    if (param.length() == 0 && sCurrLine.charAt(i) != ')') {
-                                        System.out.println("Hmm. Something's not right.");
+                                    if (param.length() == 0 && comma) {
                                         terminate();
                                         break;
                                     } else if (sCurrLine.charAt(i) != ')' || param.length() > 0){
@@ -354,7 +649,6 @@ public class Main {
                                             }
                                         }
                                         if (!param_type) {
-                                            System.out.println("Parameter type error: " + parameter_type);
                                             terminate();
                                             break;
                                         }
@@ -377,7 +671,6 @@ public class Main {
                                             }
                                         }
                                         if (parameter_name.length() > 0 && (param_name || parameter_name.contains(" ") || (parameter_name.charAt(0) >= '0' && parameter_name.charAt(0) <= '9'))) {
-                                            System.out.println("Parameter name error");
                                             terminate();
                                             break;
                                         } else {
@@ -389,15 +682,12 @@ public class Main {
                                                     }
                                                 }
                                                 if (!valid || parameter_name.equals("void")) {
-                                                    System.out.println("Invalid name. Should not be a data type.");
                                                     terminate();
                                                 } else {
                                                     fDef_DeclVar.add(parameter_name);
                                                 }
                                             }
-                                            System.out.println("Contents of variables declared: " );
                                             for (String s : fDef_DeclVar) {
-                                                System.out.print(s + " ");
                                             }
                                         }
 
@@ -407,7 +697,6 @@ public class Main {
                                     for (i++; sCurrLine.charAt(i) != '{'; i++) {
                                         if (sCurrLine.charAt(i) != ' ') {
                                             terminate();
-                                            System.out.println("Inability to find EOF");
                                             break;
                                         }
                                     }
@@ -416,7 +705,6 @@ public class Main {
                                     while (readLine.isEmpty()) {
                                         readLine = br.readLine();
                                     }
-                                    System.out.println("Readline's content: " + readLine);
                                     readLine = readLine.trim();
                                     while (valid && readLine.charAt(0) != '}') {
                                         sCurrLine = "";
@@ -428,23 +716,18 @@ public class Main {
                                             sCurrLine = sCurrLine.concat(readLine.charAt(0) + "");
                                             readLine = readLine.substring(1);
                                             while (readLine.isEmpty()) {
-                                                //System.out.println("Empty. Finding next.");
                                                 readLine = br.readLine();
                                             }
                                         }
                                         sCurrLine = sCurrLine.trim();
                                         sCurrLine = sCurrLine.concat(";");
-                                        System.out.println("sCurrLine's content: " + sCurrLine);
                                         readLine = readLine.substring(1);
                                         if (sCurrLine.startsWith("return ")) {
                                             returned = true;
-                                            System.out.println("A return value");
                                             sCurrLine = sCurrLine.substring(7);
-                                            System.out.println(sCurrLine);
                                             int parentheses = 0;
                                             String tempSCurrLine = "";
                                             for (int j = 0; j < sCurrLine.length(); j++) {
-                                                System.out.println("s " + tempSCurrLine);
                                                 if (sCurrLine.charAt(j) == '(') {
                                                     parentheses++;
                                                     tempSCurrLine = tempSCurrLine.concat(" ");
@@ -458,37 +741,26 @@ public class Main {
                                                 } else {
                                                     tempSCurrLine = tempSCurrLine.concat(sCurrLine.charAt(j) + "");
                                                 }
-                                                System.out.println(tempSCurrLine + " is temp");
                                             }
                                             sCurrLine = tempSCurrLine;
-                                            System.out.println(sCurrLine);
                                             if (parentheses != 0) {
-                                                System.out.println("Expected parenthesis.");
                                                 terminate();
                                                 break;
                                             }
-                                            System.out.println("Parenthesis cleared");
                                             boolean operationDetected = false;
-                                            System.out.println("Valid: " + valid);
-                                            System.out.println("scurrlayn: " + sCurrLine);
                                             while (valid && (sCurrLine.charAt(0) != ';' || operationDetected)) {
-                                                System.out.println("scurrline: " + sCurrLine);
                                                 String returning = "";
                                                 sCurrLine = sCurrLine.trim();
-                                                System.out.println("sCurrLine's content for god's sake: " + sCurrLine);
                                                 while (sCurrLine.charAt(0) != ' ' && sCurrLine.charAt(0) != ';' && sCurrLine.charAt(0) != '+' && sCurrLine.charAt(0) != '/' && sCurrLine.charAt(0) != '-' && sCurrLine.charAt(0) != '*') {
                                                     returning = returning.concat(sCurrLine.charAt(0) + "");
-                                                    System.out.println("Sending " + sCurrLine.charAt(0));
                                                     sCurrLine = sCurrLine.substring(1);
                                                 }
                                                 try {
                                                     Integer.parseInt(returning); // Returned is a number which is valid.
-                                                    System.out.println(sCurrLine + "(!)");
                                                     operationDetected = false;
                                                 } catch (NumberFormatException e) { // Returned is not a number.
                                                     if (returning.contains("'")) { // Might be a character...
                                                         if (returning.length() <= 2 || returning.length() >= 5) {
-                                                            System.out.println("Too much or too less character.");
                                                             terminate();
                                                             break;
                                                         }
@@ -499,12 +771,10 @@ public class Main {
                                                             }
                                                         }
                                                         if (quoteCtr != 2) {
-                                                            System.out.println("Quotes must be two.");
                                                             terminate();
                                                             break;
                                                         }
                                                         if (returning.length() == 4 && !returning.contains("\\")) {
-                                                            System.out.println("Special case is not met.");
                                                             terminate();
                                                             break;
                                                         }
@@ -517,7 +787,6 @@ public class Main {
                                                             }
                                                         }
                                                         if (!variableExists) {
-                                                            System.out.println("Return value is non-existent: " + returning);
                                                             terminate();
                                                             break;
                                                         }
@@ -527,42 +796,31 @@ public class Main {
                                                     }
                                                 }
                                                 sCurrLine = sCurrLine.trim();
-                                                System.out.println(sCurrLine + "(!)");
                                                 if (sCurrLine.charAt(0) != ';') { // We are expecting a return type with arithmetic expression/s.
                                                     if (sCurrLine.charAt(0) == '+' || sCurrLine.charAt(0) == '/' || sCurrLine.charAt(0) == '-' || sCurrLine.charAt(0) == '*') {
                                                         operationDetected = true;
                                                         sCurrLine = sCurrLine.substring(1);
                                                         if (returning.isEmpty()) {
-                                                            System.out.println("Expected token.");
                                                             terminate();
                                                             break;
                                                         }
                                                     } else {
-                                                        System.out.println("Whoa man. We expect an operation");
                                                         terminate();
                                                         break;
                                                     }
                                                 }
-                                                System.out.println(sCurrLine + "(!)");
-
-                                                System.out.println(sCurrLine + "(!)");
                                             }
-                                            System.out.println("readline is " + readLine);
                                             if (valid) {
                                                 readLine = readLine.trim();
                                                 while (readLine.isEmpty()) {
                                                     readLine = br.readLine();
                                                     readLine = readLine.trim();
                                                 }
-                                                System.out.println("readline is " + readLine);
                                             }
                                         } else {
                                             String identifier = "";
-                                            System.out.println("sCurrLine: " + sCurrLine);
                                             while (sCurrLine.charAt(0) != ' ' && sCurrLine.charAt(0) != '=') {
-                                                System.out.println("Character is " + sCurrLine.charAt(0));
                                                 if (sCurrLine.charAt(0) == ';') {
-                                                    System.out.println("Seriously dude. It's plain wrong.");
                                                     terminate();
                                                     break;
                                                 }
@@ -577,12 +835,13 @@ public class Main {
                                                     }
                                                 }
                                                 sCurrLine = sCurrLine.trim();
-                                                System.out.println("scurrline's : " + sCurrLine);
                                                 if (varDec) {
-                                                    System.out.println("A variable declaration");
+                                                    boolean commad = false;
                                                     while (sCurrLine.charAt(0) != ';') {
+                                                        if (commad) {
+                                                            commad = false;
+                                                        }
                                                         if (sCurrLine.charAt(0) == '=' || sCurrLine.charAt(0) == ',') {
-                                                            System.out.println("Invalid variable name (which is null).");
                                                             terminate();
                                                             break;
                                                         }
@@ -594,18 +853,15 @@ public class Main {
                                                         sCurrLine = sCurrLine.trim();
                                                         identifier = identifier.trim();
                                                         if (identifier.contains(" ")) {
-                                                            System.out.println("Invalid variable name");
                                                             terminate();
                                                             break;
                                                         }
                                                         if (!(identifier.charAt(0) == '_' || (identifier.charAt(0) >= 'A' && identifier.charAt(0) <= 'Z') || (identifier.charAt(0) >= 'a' && identifier.charAt(0) <= 'z'))) {
                                                             terminate();
-                                                            System.out.println("Naming deficiency at first letter.");
                                                             break;
                                                         }
                                                         for (int j = 1; j < identifier.length(); j++) {
                                                             if (!(identifier.charAt(j) == '_' || (identifier.charAt(j) >= 'A' && identifier.charAt(j) <= 'Z') || (identifier.charAt(j) >= 'a' && identifier.charAt(j) <= 'z') || (identifier.charAt(j) >= '0' && identifier.charAt(j) <= '9'))) {
-                                                                System.out.println("Naming deficiency at next letters: " + sCurrLine.charAt(j));
                                                                 terminate();
                                                                 break;
                                                             }
@@ -618,7 +874,6 @@ public class Main {
                                                             }
                                                         }
                                                         if (varDeclared) {
-                                                            System.out.println("Redeclaration of variable");
                                                             terminate();
                                                             break;
                                                         } else {
@@ -629,7 +884,6 @@ public class Main {
                                                                 }
                                                             }
                                                             if (!valid || identifier.equals("void")) {
-                                                                System.out.println("Invalid name. Should not be a data type.");
                                                                 terminate();
                                                             } else {
                                                                 fDef_DeclVar.add(identifier);
@@ -637,11 +891,13 @@ public class Main {
                                                         }
                                                         if (sCurrLine.charAt(0) == '=') {
                                                             sCurrLine = sCurrLine.substring(1);
+                                                            int k;
+                                                            for (k = 0; k < sCurrLine.length() && sCurrLine.charAt(k) != ';' && sCurrLine.charAt(k) != ','; k++);
+                                                            String storedsline = sCurrLine.substring(k);
                                                             int parentheses = 0;
                                                             String tempSCurrLine = "";
                                                             int j;
                                                             for (j = 0; j < sCurrLine.length() && sCurrLine.charAt(j) != ',' && sCurrLine.charAt(j) != ';'; j++) {
-                                                                System.out.println("s " + tempSCurrLine);
                                                                 if (sCurrLine.charAt(j) == '(') {
                                                                     parentheses++;
                                                                     tempSCurrLine = tempSCurrLine.concat(" ");
@@ -655,54 +911,41 @@ public class Main {
                                                                 } else {
                                                                     tempSCurrLine = tempSCurrLine.concat(sCurrLine.charAt(j) + "");
                                                                 }
-                                                                System.out.println(tempSCurrLine + " is temp");
                                                             }
                                                             sCurrLine = tempSCurrLine;
-                                                            sCurrLine = sCurrLine.concat(";");
-                                                            System.out.println(sCurrLine);
+                                                            sCurrLine = sCurrLine.concat(",");
                                                             if (parentheses != 0) {
-                                                                System.out.println("Expected parenthesis.");
                                                                 terminate();
                                                                 break;
                                                             }
-                                                            System.out.println("Parenthesis cleared");
                                                             boolean operationDetected = false;
-                                                            System.out.println("Valid: " + valid);
-                                                            System.out.println("scurrlayn: " + sCurrLine);
                                                             while (valid && ((sCurrLine.charAt(0) != ';' && sCurrLine.charAt(0) != ',') || operationDetected)) {
-                                                                System.out.println("scurrline: " + sCurrLine);
                                                                 String returning = "";
                                                                 sCurrLine = sCurrLine.trim();
-                                                                System.out.println("sCurrLine's content for god's sake: " + sCurrLine);
                                                                 while (sCurrLine.charAt(0) != ',' && sCurrLine.charAt(0) != ' ' && sCurrLine.charAt(0) != ';' && sCurrLine.charAt(0) != '+' && sCurrLine.charAt(0) != '/' && sCurrLine.charAt(0) != '-' && sCurrLine.charAt(0) != '*') {
                                                                     returning = returning.concat(sCurrLine.charAt(0) + "");
-                                                                    System.out.println("Sending " + sCurrLine.charAt(0));
                                                                     sCurrLine = sCurrLine.substring(1);
                                                                 }
                                                                 try {
                                                                     Integer.parseInt(returning); // Returned is a number which is valid.
-                                                                    System.out.println(sCurrLine + "(!)");
                                                                     operationDetected = false;
                                                                 } catch (NumberFormatException e) { // Returned is not a number.
                                                                     if (returning.contains("'")) { // Might be a character...
                                                                         if (returning.length() <= 2 || returning.length() >= 5) {
-                                                                            System.out.println("Too much or too less character.");
                                                                             terminate();
                                                                             break;
                                                                         }
                                                                         int quoteCtr = 0;
-                                                                        for (int k = 0; k < returning.length(); k++) {
-                                                                            if (returning.charAt(k) == '\'') {
+                                                                        for (int l = 0; l < returning.length(); l++) {
+                                                                            if (returning.charAt(l) == '\'') {
                                                                                 quoteCtr++;
                                                                             }
                                                                         }
                                                                         if (quoteCtr != 2) {
-                                                                            System.out.println("Quotes must be two.");
                                                                             terminate();
                                                                             break;
                                                                         }
                                                                         if (returning.length() == 4 && !returning.contains("\\")) {
-                                                                            System.out.println("Special case is not met.");
                                                                             terminate();
                                                                             break;
                                                                         }
@@ -715,7 +958,6 @@ public class Main {
                                                                             }
                                                                         }
                                                                         if (!variableExists) {
-                                                                            System.out.println("Return value is non-existent: " + returning);
                                                                             terminate();
                                                                             break;
                                                                         }
@@ -725,49 +967,40 @@ public class Main {
                                                                     }
                                                                 }
                                                                 sCurrLine = sCurrLine.trim();
-                                                                System.out.println(sCurrLine + "(!)");
-                                                                if (sCurrLine.charAt(0) != ';') { // We are expecting a return type with arithmetic expression/s.
+                                                                if (sCurrLine.charAt(0) != ';' && sCurrLine.charAt(0) != ',') { // We are expecting a return type with arithmetic expression/s.
                                                                     if (sCurrLine.charAt(0) == '+' || sCurrLine.charAt(0) == '/' || sCurrLine.charAt(0) == '-' || sCurrLine.charAt(0) == '*') {
                                                                         operationDetected = true;
                                                                         sCurrLine = sCurrLine.substring(1);
                                                                         if (returning.isEmpty()) {
-                                                                            System.out.println("Expected token.");
                                                                             terminate();
                                                                             break;
                                                                         }
                                                                     } else {
-                                                                        System.out.println("Whoa man. We expect an operation");
                                                                         terminate();
                                                                         break;
                                                                     }
                                                                 }
-                                                                System.out.println(sCurrLine + "(!)");
+                                                            }
 
-                                                                System.out.println(sCurrLine + "(!)");
-                                                            }
-                                                            System.out.println("readline is " + readLine);
-                                                            if (valid) {
-                                                                readLine = readLine.trim();
-                                                                while (readLine.isEmpty()) {
-                                                                    readLine = br.readLine();
-                                                                    readLine = readLine.trim();
-                                                                }
-                                                                System.out.println("readline is " + readLine);
-                                                            }
+                                                            sCurrLine = storedsline;
                                                         }
+                                                        sCurrLine = sCurrLine.trim();
                                                         if (sCurrLine.charAt(0) == ',') {
                                                             sCurrLine = sCurrLine.substring(1);
+                                                            commad = true;
                                                         }
                                                     }
+                                                    if (commad && varDec) {
+                                                        terminate();
+                                                        break;
+                                                    }
                                                 } else {
-                                                    System.out.println("Not a var dec");
                                                     if (sCurrLine.charAt(0) == '=') {
                                                         sCurrLine = sCurrLine.substring(1);
                                                     }
                                                     int parentheses = 0;
                                                     String tempSCurrLine = "";
                                                     for (int j = 0; j < sCurrLine.length(); j++) {
-                                                        System.out.println("s " + tempSCurrLine);
                                                         if (sCurrLine.charAt(j) == '(') {
                                                             parentheses++;
                                                             tempSCurrLine = tempSCurrLine.concat(" ");
@@ -781,37 +1014,26 @@ public class Main {
                                                         } else {
                                                             tempSCurrLine = tempSCurrLine.concat(sCurrLine.charAt(j) + "");
                                                         }
-                                                        System.out.println(tempSCurrLine + " is temp");
                                                     }
                                                     sCurrLine = tempSCurrLine;
-                                                    System.out.println(sCurrLine);
                                                     if (parentheses != 0) {
-                                                        System.out.println("Expected parenthesis.");
                                                         terminate();
                                                         break;
                                                     }
-                                                    System.out.println("Parenthesis cleared");
                                                     boolean operationDetected = false;
-                                                    System.out.println("Valid: " + valid);
-                                                    System.out.println("scurrlayn: " + sCurrLine);
                                                     while (valid && (sCurrLine.charAt(0) != ';' || operationDetected)) {
-                                                        System.out.println("scurrline: " + sCurrLine);
                                                         String returning = "";
                                                         sCurrLine = sCurrLine.trim();
-                                                        System.out.println("sCurrLine's content for god's sake: " + sCurrLine);
                                                         while (sCurrLine.charAt(0) != ' ' && sCurrLine.charAt(0) != ';' && sCurrLine.charAt(0) != '+' && sCurrLine.charAt(0) != '/' && sCurrLine.charAt(0) != '-' && sCurrLine.charAt(0) != '*') {
                                                             returning = returning.concat(sCurrLine.charAt(0) + "");
-                                                            System.out.println("Sending " + sCurrLine.charAt(0));
                                                             sCurrLine = sCurrLine.substring(1);
                                                         }
                                                         try {
                                                             Integer.parseInt(returning); // Returned is a number which is valid.
-                                                            System.out.println(sCurrLine + "(!)");
                                                             operationDetected = false;
                                                         } catch (NumberFormatException e) { // Returned is not a number.
                                                             if (returning.contains("'")) { // Might be a character...
                                                                 if (returning.length() <= 2 || returning.length() >= 5) {
-                                                                    System.out.println("Too much or too less character.");
                                                                     terminate();
                                                                     break;
                                                                 }
@@ -822,12 +1044,10 @@ public class Main {
                                                                     }
                                                                 }
                                                                 if (quoteCtr != 2) {
-                                                                    System.out.println("Quotes must be two.");
                                                                     terminate();
                                                                     break;
                                                                 }
                                                                 if (returning.length() == 4 && !returning.contains("\\")) {
-                                                                    System.out.println("Special case is not met.");
                                                                     terminate();
                                                                     break;
                                                                 }
@@ -840,7 +1060,6 @@ public class Main {
                                                                     }
                                                                 }
                                                                 if (!variableExists) {
-                                                                    System.out.println("Return value is non-existent: " + returning);
                                                                     terminate();
                                                                     break;
                                                                 }
@@ -850,193 +1069,67 @@ public class Main {
                                                             }
                                                         }
                                                         sCurrLine = sCurrLine.trim();
-                                                        System.out.println(sCurrLine + "(!)");
                                                         if (sCurrLine.charAt(0) != ';') { // We are expecting a return type with arithmetic expression/s.
                                                             if (sCurrLine.charAt(0) == '+' || sCurrLine.charAt(0) == '/' || sCurrLine.charAt(0) == '-' || sCurrLine.charAt(0) == '*') {
                                                                 operationDetected = true;
                                                                 sCurrLine = sCurrLine.substring(1);
                                                                 if (returning.isEmpty()) {
-                                                                    System.out.println("Expected token.");
                                                                     terminate();
                                                                     break;
                                                                 }
                                                             } else {
-                                                                System.out.println("Whoa man. We expect an operation");
                                                                 terminate();
                                                                 break;
                                                             }
                                                         }
-                                                        System.out.println(sCurrLine + "(!)");
-
-                                                        System.out.println(sCurrLine + "(!)");
                                                     }
-                                                    System.out.println("readline is " + readLine);
                                                     if (valid) {
                                                         readLine = readLine.trim();
                                                         while (readLine.isEmpty()) {
                                                             readLine = br.readLine();
                                                             readLine = readLine.trim();
                                                         }
-                                                        System.out.println("readline is " + readLine);
                                                     }
                                                 }
-                                                System.out.println(sCurrLine + " is scurr and " + varDec);
-                                                /*if (!((varDec && sCurrLine.charAt(0) == ';') || sCurrLine.charAt(0) == '=' || sCurrLine.charAt(0) == ',')) {
-                                                    System.out.println("haha dude are you trying to make me laugh?");
-                                                    terminate();
-                                                    break;
-                                                }*/
                                             }
                                         }
-                                        /*if (valid) {
-                                            int parentheses = 0;
-                                            String tempSCurrLine = "";
-                                            for (int j = 0; j < sCurrLine.length(); j++) {
-                                                System.out.println("s " + tempSCurrLine);
-                                                if (sCurrLine.charAt(j) == '(') {
-                                                    parentheses++;
-                                                    tempSCurrLine = tempSCurrLine.concat(" ");
-                                                    if (sCurrLine.charAt(j + 1) != '(') {
-                                                        j++;
-                                                        tempSCurrLine = tempSCurrLine.concat(sCurrLine.charAt(j) + "");
-                                                    }
-                                                } else if (sCurrLine.charAt(j) == ')') {
-                                                    parentheses--;
-                                                    tempSCurrLine = tempSCurrLine.concat(" ");
-                                                } else {
-                                                    tempSCurrLine = tempSCurrLine.concat(sCurrLine.charAt(j) + "");
-                                                }
-                                                System.out.println(tempSCurrLine + " is temp");
-                                            }
-                                            sCurrLine = tempSCurrLine;
-                                            System.out.println(sCurrLine);
-                                            if (parentheses != 0) {
-                                                System.out.println("Expected parenthesis.");
-                                                terminate();
-                                                break;
-                                            }
-                                            System.out.println("Parenthesis cleared");
-                                            boolean operationDetected = false;
-                                            System.out.println("Valid: " + valid);
-                                            System.out.println("scurrlayn: " + sCurrLine);
-                                            while (valid && (sCurrLine.charAt(0) != ';' || operationDetected)) {
-                                                System.out.println("scurrline: " + sCurrLine);
-                                                String returning = "";
-                                                sCurrLine = sCurrLine.trim();
-                                                System.out.println("sCurrLine's content for god's sake: " + sCurrLine);
-                                                while (sCurrLine.charAt(0) != ' ' && sCurrLine.charAt(0) != ';' && sCurrLine.charAt(0) != '+' && sCurrLine.charAt(0) != '/' && sCurrLine.charAt(0) != '-' && sCurrLine.charAt(0) != '*') {
-                                                    returning = returning.concat(sCurrLine.charAt(0) + "");
-                                                    System.out.println("Sending " + sCurrLine.charAt(0));
-                                                    sCurrLine = sCurrLine.substring(1);
-                                                }
-                                                try {
-                                                    Integer.parseInt(returning); // Returned is a number which is valid.
-                                                    System.out.println(sCurrLine + "(!)");
-                                                    operationDetected = false;
-                                                } catch (NumberFormatException e) { // Returned is not a number.
-                                                    if (returning.contains("'")) { // Might be a character...
-                                                        if (returning.length() <= 2 || returning.length() >= 5) {
-                                                            System.out.println("Too much or too less character.");
-                                                            terminate();
-                                                            break;
-                                                        }
-                                                        int quoteCtr = 0;
-                                                        for (int j = 0; j < returning.length(); j++) {
-                                                            if (returning.charAt(j) == '\'') {
-                                                                quoteCtr++;
-                                                            }
-                                                        }
-                                                        if (quoteCtr != 2) {
-                                                            System.out.println("Quotes must be two.");
-                                                            terminate();
-                                                            break;
-                                                        }
-                                                        if (returning.length() == 4 && !returning.contains("\\")) {
-                                                            System.out.println("Special case is not met.");
-                                                            terminate();
-                                                            break;
-                                                        }
-                                                        operationDetected = false;
-                                                    } else {
-                                                        boolean variableExists = false;
-                                                        for (String s : fDef_DeclVar) {
-                                                            if (s.equals(returning)) {
-                                                                variableExists = true;
-                                                            }
-                                                        }
-                                                        if (!variableExists) {
-                                                            System.out.println("Return value is non-existent: " + returning);
-                                                            terminate();
-                                                            break;
-                                                        }
-                                                        if (!returning.isEmpty()) {
-                                                            operationDetected = false;
-                                                        }
-                                                    }
-                                                }
-                                                sCurrLine = sCurrLine.trim();
-                                                System.out.println(sCurrLine + "(!)");
-                                                if (sCurrLine.charAt(0) != ';') { // We are expecting a return type with arithmetic expression/s.
-                                                    if (sCurrLine.charAt(0) == '+' || sCurrLine.charAt(0) == '/' || sCurrLine.charAt(0) == '-' || sCurrLine.charAt(0) == '*') {
-                                                        operationDetected = true;
-                                                        sCurrLine = sCurrLine.substring(1);
-                                                        if (returning.isEmpty()) {
-                                                            System.out.println("Expected token.");
-                                                            terminate();
-                                                            break;
-                                                        }
-                                                    } else {
-                                                        System.out.println("Whoa man. We expect an operation");
-                                                        terminate();
-                                                        break;
-                                                    }
-                                                }
-                                                System.out.println(sCurrLine + "(!)");
-
-                                                System.out.println(sCurrLine + "(!)");
-                                            }
-                                            System.out.println("readline is " + readLine);
-                                            if (valid) {
-                                                readLine = readLine.trim();
-                                                while (readLine.isEmpty()) {
-                                                    readLine = br.readLine();
-                                                    readLine = readLine.trim();
-                                                }
-                                                System.out.println("readline is " + readLine);
-                                            }
-                                        }*/
                                         if (valid) {
                                             readLine = readLine.trim();
                                             while (readLine.isEmpty()) {
                                                 readLine = br.readLine();
                                                 readLine = readLine.trim();
                                             }
-                                            System.out.println("readline is " + readLine);
                                         }
                                     }
-                                    System.out.println("We found the ender!");
                                     if (!returnType.equals("void") && !returned) {
                                         valid = false;
-                                        System.out.println("Ended without Return");
+                                        readLine = readLine.substring(1);
                                     }
-                                    readLine = readLine.substring(1);
+                                    if (valid) {
+                                        readLine = readLine.substring(1);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-
+                String testCaseType = "";
+                for (int j = 0; j < type.toString().length(); j++) {
+                    if (type.toString().charAt(j) == '_') {
+                        testCaseType = testCaseType.concat(" ");
+                    } else {
+                        testCaseType = testCaseType.concat(type.toString().charAt(j) + "");
+                    }
+                }
                 if (valid) {
-                    wr.append("VALID ").append(type.toString());
-                    System.out.println("VALID po");
+                    wr.append("VALID ").append(testCaseType);
                 } else {
-                    wr.append("INVALID ").append(type.toString());
-                    System.out.println("INVALID po");
+                    wr.append("INVALID ").append(testCaseType);
                 }
                 wr.newLine();
             }
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            // do nothing
         } finally {
             // Before terminating, close all buffered readers and writers.
             try {
@@ -1051,9 +1144,7 @@ public class Main {
     private static void terminate() {
         try {
             valid = false;
-            wr.append("INVALID FUNCTION DEFINITION");
-            System.out.println(readLine + " is readline");
-            while (/*readLine == null || */readLine.length() == 0) {
+            while (readLine.length() == 0) {
                 readLine = br.readLine();
             }
             while (readLine.charAt(0) != '}') {
@@ -1066,6 +1157,368 @@ public class Main {
         } catch (IOException e) {
             // do nothing
         }
+    }
+
+    //check if the declared value is valid
+    private static boolean checkValueIfValid(String type, String value){
+        boolean isValid = false;
+        if(value == null){
+            isValid = false;
+        }else {
+            boolean not_empty = false;
+            for(int i = 0; i < value.length(); i++){
+                if(value.charAt(i)!= ' '){
+                    not_empty = true;
+                }
+            }
+            if(not_empty){
+                int s = 0;
+                if (value.charAt(0) == ' ') {
+                    while (value.charAt(s) == ' ') {
+                        s++;
+                    }
+                    value = value.substring(s, value.length());
+                }
+                int z = value.length() - 1;
+                if (value.charAt(z) == ' ') {
+                    while (value.charAt(z) == ' ') {
+                        z--;
+                    }
+                    value = value.substring(0, z + 1);
+
+                }
+
+                if (type.equals("int")) {
+                    if (value.contains("'")) {
+                        if (value.length() == 3 && value.charAt(0) == '\'') {
+                            if(value.charAt(2) == '\''){
+                                isValid = true;
+                            }else{
+                                isValid = false;
+                            }
+                        } else {
+                            isValid = false;
+                        }
+                    } else {
+                        if(value.length() == 1){
+                            if(value.charAt(0) == '-'){
+                                isValid = false;
+                            }else{
+                                if(value.charAt(0) >= '0' && value.charAt(0) <= '9'){
+                                    isValid = true;
+                                }else{
+                                    isValid = false;
+                                }
+                            }
+
+                        }else{
+
+                            if(value.charAt(0) == '-'){
+                                int i = 1;
+                                boolean not_space = true;
+                                while(not_space){
+                                    if(value.charAt(i) != ' '){
+                                        value = value.substring(i, value.length());
+                                        not_space = false;
+                                    }else{
+                                        i++;
+                                    }
+                                }
+                                for(int j = 0; j < value.length(); j++){
+                                    if(value.charAt(j) >= '0' && value.charAt(j) <= '9'){
+                                        isValid = true;
+                                    }else{
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                                if(isValid){
+                                    value = "-" + value;
+                                }
+                            }else{
+                                for(int i = 0; i < value.length(); i++){
+                                    if(value.charAt(i) >= '0' && value.charAt(i) <= '9'){
+                                        isValid = true;
+                                    }else{
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                } else if (type.equals("float")) {
+                    if (value.contains("'")) {
+                        if (value.length() == 3 && value.charAt(0) == '\'') {
+                            if(value.charAt(2) == '\''){
+                                isValid = true;
+                            }else{
+                                isValid = false;
+                            }
+                        } else {
+                            isValid = false;
+                        }
+                    } else {
+                        int cnt = 0;
+                        for (int i = 0; i < value.length(); i++) {
+                            if (value.charAt(i) == '.') {
+                                cnt++;
+                            }
+                        }
+
+                        if (cnt > 1) {
+                            return false;
+                        } else {
+                            if(value.charAt(0) == '-'){
+                                int i = 1;
+                                boolean not_space = true;
+                                while(not_space){
+                                    if(value.charAt(i) != ' '){
+                                        value = value.substring(i, value.length());
+                                        not_space = false;
+                                    }else{
+                                        i++;
+                                    }
+                                }
+                                for(int j = 0; j < value.length(); j++){
+                                    if((value.charAt(j) >= '0' && value.charAt(j) <= '9') || value.charAt(j) == '.'){
+                                        isValid = true;
+                                    }else{
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                                if(isValid){
+                                    value = "-" + value;
+                                }
+                            }else {
+                                for (int i = 0; i < value.length(); i++) {
+                                    if ((value.charAt(i) >= '0' && value.charAt(i) <= '9') || value.charAt(i) == '.') {
+                                        isValid = true;
+                                    } else {
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+
+                } else if (type.equals("char")) {
+                    if (value.contains("'")){
+                        if((value.length() == 3) && (value.charAt(0) == '\'')){
+                            if(value.charAt(2) == '\''){
+                                isValid = true;
+                            } else{
+                                isValid = false;
+                            }
+                        }else{
+                            isValid = false;
+                        }
+                    }else{
+                        for(int i = 0; i < value.length(); i++){
+                            if(value.charAt(i) >= '0' && value.charAt(i) <= '9'){
+                                isValid = true;
+                            }else{
+                                isValid = false;
+                                break;
+                            }
+                        }
+                    }
+
+                } else { //means it's a double type
+                    if (value.contains("'")) {
+                        if (value.length() == 3 && value.charAt(0) == '\'') {
+                            if(value.charAt(2) == '\''){
+                                isValid = true;
+                            }else{
+                                isValid = false;
+                            }
+                        } else {
+                            isValid = false;
+                        }
+                    } else {
+                        int cnt = 0;
+                        for (int i = 0; i < value.length(); i++) {
+                            if (value.charAt(i) == '.') {
+                                cnt++;
+                            }
+                        }
+
+                        if (cnt > 1) {
+                            return false;
+                        } else {
+                            if(value.charAt(0) == '-'){
+                                int i = 1;
+                                boolean not_space = true;
+                                while(not_space){
+                                    if(value.charAt(i) != ' '){
+                                        value = value.substring(i, value.length());
+                                        not_space = false;
+                                    }else{
+                                        i++;
+                                    }
+                                }
+                                for(int j = 0; j < value.length(); j++){
+                                    if((value.charAt(j) >= '0' && value.charAt(j) <= '9') || value.charAt(j) == '.'){
+                                        isValid = true;
+                                    }else{
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                                if(isValid){
+                                    value = "-" + value;
+                                }
+                            }else {
+                                for (int i = 0; i < value.length(); i++) {
+                                    if ((value.charAt(i) >= '0' && value.charAt(i) <= '9') || value.charAt(i) == '.') {
+                                        isValid = true;
+                                    } else {
+                                        isValid = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+
+                }
+            }else{
+                isValid = false;
+            }
+
+
+        }
+        if(!(type.equals("char"))){
+            if(isValid){
+                isValid = checkRangeIfValid(type, value);
+            }
+        }
+
+        return isValid;
+    }
+    private static boolean checkRangeIfValid(String type, String value){
+        int isInteger;
+        float isFloat;
+        double isDouble;
+        //try catch
+        if (value.contains("'")) {
+            if (value.length() == 3 && value.charAt(0) == '\'') {
+                if(value.charAt(2) == '\''){
+                    return true;
+                }else{
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        else{
+            if(type.equals("int")){
+                try {
+                    isInteger = Integer.parseInt(value);
+                    return true;
+                }catch  (Exception e){
+                    return false;
+                }
+
+            }else if(type.equals("float")){
+                try {
+                    isFloat = Float.parseFloat(value);
+                    return true;
+                }catch  (Exception e){
+                    return false;
+                }
+            }else { //double
+                try {
+                    isDouble = Double.parseDouble(value);
+                    return true;
+                }catch  (Exception e){
+                    return false;
+                }
+            }
+        }
+
+
+    }
+    //check if the declared type is valid
+    private static boolean checkTypeIfValid(String type){
+        if(type.equals("int")){
+            return true;
+        }else if(type.equals("float")){
+            return true;
+        }else if(type.equals("char")){
+            return true;
+        }else if(type.equals("double")){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    //check if the declared variable name is valid
+    private static boolean checkNameIfValid(String name){
+        boolean isValid = false;
+        if(name == null){
+            isValid = false;
+        }else {
+            boolean not_empty = false;
+            for(int i = 0; i < name.length(); i++){
+                if(name.charAt(i)!= ' '){
+                    not_empty = true;
+                }
+            }if(not_empty){
+                int s = 0;
+
+                if (name.charAt(0) == ' ') {
+                    while (name.charAt(s) == ' ') {
+                        s++;
+                    }
+                    name = name.substring(s, name.length());
+                }
+                int z = name.length() - 1;
+                if (name.charAt(z) == ' ') {
+                    while (name.charAt(z) == ' ') {
+                        z--;
+                    }
+                    name = name.substring(0, z + 1);
+
+                }
+                if(!((name.equals("int")) || (name.equals("float")) || (name.equals("double") || (name.equals("char"))))){
+                    for (int i = 0; i < name.length(); i++) {
+                        if (i == 0) {
+                            if ((name.charAt(i) >= 'a' && name.charAt(i) <= 'z') || (name.charAt(i) >= 'A' && name.charAt(i) <= 'Z') || (name.charAt(i) == '_')) {
+                                isValid = true;
+                            } else {
+                                isValid = false;
+                                break;
+                            }
+                        } else {
+                            if ((name.charAt(i) >= 'a' && name.charAt(i) <= 'z') || (name.charAt(i) >= 'A' && name.charAt(i) <= 'Z') || (name.charAt(i) == '_') || (name.charAt(i) >= '0' && name.charAt(i) <= '9')) {
+                                isValid = true;
+                            } else {
+                                isValid = false;
+                                break;
+                            }
+                        }
+
+                    }
+                }else{
+                    isValid = false;
+                }
+
+            }else{
+                isValid = false;
+            }
+        }
+        return isValid;
     }
 
     private enum Type {

@@ -5,7 +5,7 @@ int function();
 int func(int){
 int x = 10;
 }
-int square(int x){
+int 1square(int x){
     return x * x;
 }
 INT function2(void);
