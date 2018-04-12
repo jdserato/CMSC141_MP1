@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Serato, Jay Vince on April 10, 2018.
+ * Created by Serato, Jay Vince; Alvarez, Mary Michaelle; and Famat, Ruffa Mae on April 10, 2018.
  */
 public class Main {
     private static final File INPUT = new File("mp3.in");
@@ -26,18 +26,19 @@ public class Main {
                 String exp = "";
                 for (int i = 0; i < regex.length(); i++) {
                     if (regex.charAt(i) == '*' || regex.charAt(i) == ')') {
-                        if (exp.isEmpty()) {
-                            // TODO shouldn't be. Awaiting for forum opening.
+                        if (i + 1 < regex.length() && regex.charAt(i + 1) == '*') {
+                            expressions.add(exp.concat(regex.charAt(i) + "*"));
+                            i++;
                         } else {
-                            if (i + 1 < regex.length() && regex.charAt(i + 1) == '*') {
-                                expressions.add(exp.concat(regex.charAt(i) + "*"));
-                                i++;
-                            } else {
-                                expressions.add(exp.concat(regex.charAt(i) + ""));
+                            if (regex.charAt(i) == '*' && exp.charAt(exp.length() - 1) != ')') {
+                                while (exp.length() > 1) {
+                                    expressions.add(exp.charAt(0) + "");
+                                    exp = exp.substring(1);
+                                }
                             }
-                            exp = "";
+                            expressions.add(exp.concat(regex.charAt(i) + ""));
                         }
-
+                        exp = "";
                     } else {
                         exp = exp.concat(regex.charAt(i) + "");
                     }
@@ -50,6 +51,7 @@ public class Main {
                 for (String s : expressions) {
                     System.out.println(s);
                 }
+                System.out.println();
 
                 // TODO get the number of sample expressions
                 int numberOfSampleExp = Integer.parseInt(br.readLine());
