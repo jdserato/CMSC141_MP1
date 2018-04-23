@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,37 +22,10 @@ public class Main {
 
             while (numberOfTestCases-- > 0) {
                 // TODO get regex and divide them.
-                String regex = br.readLine(); // The regular expression (regex) is defined here.
-                List<String> expressions = new ArrayList<>();
-                String exp = "";
-                for (int i = 0; i < regex.length(); i++) {
-                    if (regex.charAt(i) == '*' || regex.charAt(i) == ')') {
-                        if (i + 1 < regex.length() && regex.charAt(i + 1) == '*') {
-                            expressions.add(exp.concat(regex.charAt(i) + "*"));
-                            i++;
-                        } else {
-                            if (regex.charAt(i) == '*' && exp.charAt(exp.length() - 1) != ')') {
-                                while (exp.length() > 1) {
-                                    expressions.add(exp.charAt(0) + "");
-                                    exp = exp.substring(1);
-                                }
-                            }
-                            expressions.add(exp.concat(regex.charAt(i) + ""));
-                        }
-                        exp = "";
-                    } else {
-                        exp = exp.concat(regex.charAt(i) + "");
-                    }
-                }
-                if (!exp.isEmpty()) {
-                    expressions.add(exp);
-                }
-
-                // TODO delete debug
-                for (String s : expressions) {
-                    System.out.println(s);
-                }
-                System.out.println();
+                String regexRead = br.readLine(); // The regular expression (regex) is defined here.
+                regexRead = "(".concat(regexRead).concat(")");
+                List<String> content = Collections.singletonList(regexRead);
+                Regex root = new Regex(content);
 
                 // TODO get the number of sample expressions
                 int numberOfSampleExp = Integer.parseInt(br.readLine());
@@ -72,5 +46,27 @@ public class Main {
                 // do nothing
             }
         }
+    }
+
+    private List<Regex> fragment(Regex src, String content) {
+        List<Regex> children = new ArrayList<>();
+        List<String> subcontent = new ArrayList<>();
+        int parentheses = 0;
+        for (int i = 0; i < content.length(); i++) {
+            char c = content.charAt(i);
+            if (c == '(') {
+                parentheses++;
+            } else if (c == ')') {
+                parentheses--;
+            }
+            if (parentheses == 0) {
+                if (i + 1 < content.length() && content.charAt(i + 1) == '*') {
+                    children.add(new Regex(subcontent, true, src));
+                } else {
+                    children.add(new Regex(subcontent, false, src));
+                }
+            }
+        }
+        return children;
     }
 }
