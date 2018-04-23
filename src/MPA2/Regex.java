@@ -1,5 +1,6 @@
 package MPA2;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,8 +20,10 @@ class Regex {
         done = false;
     }
 
-    Regex(List<String> contents) {
-        new Regex(contents, false, null);
+    Regex(String contents) {
+        List<String> list = new ArrayList<>();
+        list.add(contents);
+        new Regex(list, false, null);
     }
 
     public Regex getParent() {
@@ -61,5 +64,20 @@ class Regex {
 
     public void setDone(boolean done) {
         this.done = done;
+    }
+
+    public String toString() {
+        String s = "";
+        for (String str : contents) {
+            s = s.concat(str + " ");
+        }
+        if (this.getChildren() == null) {
+            return s;
+        } else {
+            for (Regex r : this.getChildren()) {
+                s = s.concat(r.toString());
+            }
+            return s;
+        }
     }
 }
