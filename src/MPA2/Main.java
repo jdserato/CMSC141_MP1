@@ -64,8 +64,17 @@ public class Main {
             System.out.println("Scanning " + c);
             if (c == '(') {
                 parentheses++;
+                if (parentheses > 1) {
+
+                    current = current.concat(c + "");
+                    System.out.println("New current at " + current);
+                }
             } else if (c == ')') {
                 parentheses--;
+                if (parentheses >= 1) {
+                    current = current.concat(c + "");
+                    System.out.println("New current at " + current);
+                }
             } else if (!(parentheses == 0 && (c == 'U'|| c == '*'))){
                 current = current.concat(c + "");
                 System.out.println("New current at " + current);
@@ -85,6 +94,7 @@ public class Main {
                 } else {
                     // FIXME this should make sense to all of the following: a*b*, ab*, (ab) and abc*
                     if (i + 1 < content.length() && content.charAt(i + 1) == '*') {
+                        i++;
                         if (c != ')') {
                             List<String> sub = new ArrayList<>();
                             String subs = current.substring(0, current.length() - 1);

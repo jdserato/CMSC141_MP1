@@ -16,6 +16,18 @@ public class MainTest extends TestCase {
         assertEquals("[ab ]", Main.fragment(new Regex("(ab)*"), "(ab)*").toString());
     }
     public void test4() {
-        assertEquals("[ab ]", Main.fragment(new Regex("(ab)(aaUbb)*"), "(ab)(aaUbb)*").toString());
+        assertEquals("[ab ]", Main.fragment(new Regex("(ab)*(aaUbb)*"), "(ab)*(aaUbb)*").toString());
+    }
+    public void test5() {
+        assertEquals("[ab ]", Main.fragment(new Regex("ab*"), "ab*").toString());
+    }
+    public void test6() {
+        assertEquals("[ab , c ]", Main.fragment(new Regex("abc*"), "abc*").toString());
+    }
+    public void test7() {
+        assertEquals("[ab , c ]", Main.fragment(new Regex("ab(cU(cd)*)*"), "ab(cU(cd)*)*").toString());
+    }
+    public void test8() {
+        assertEquals("[ab , c ]", Main.fragment(new Regex("(cU(cd)*)*"), "(cU(cd)*)*").toString());
     }
 }
