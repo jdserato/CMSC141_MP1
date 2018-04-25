@@ -30,4 +30,10 @@ public class MainTest extends TestCase {
     public void test8() {
         assertEquals("[ab , c ]", Main.fragment(new Regex("(cU(cd)*)*"), "(cU(cd)*)*").toString());
     }
+    public void test9() {
+        assertEquals("[a b c ]", Main.fragment(new Regex("aUbUc"), "aUbUc").toString());
+    }
+    public void test10() {
+        assertEquals("[a b c ]", Main.fragment(new Regex("(aU(bd)*Uc)(ab)*"), "(aU(bd)*Uc)(ab)*").toString());
+    }
 }

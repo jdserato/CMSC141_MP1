@@ -12,6 +12,7 @@ class Regex {
     private List<String> contents;
     private boolean star;
     private boolean done;
+    private int childrenInsp = 0;
 
     Regex(List<String> contents, boolean star, Regex parent) {
         this.contents = contents;
@@ -23,7 +24,17 @@ class Regex {
     Regex(String contents) {
         List<String> list = new ArrayList<>();
         list.add(contents);
-        new Regex(list, false, null);
+        this.contents = list;
+        star = false;
+        parent = null;
+    }
+
+    public int getChildrenInsp() {
+        return childrenInsp;
+    }
+
+    public void setChildrenInsp(int childrenInsp) {
+        this.childrenInsp = childrenInsp;
     }
 
     public Regex getParent() {
@@ -79,5 +90,33 @@ class Regex {
             }
             return s;
         }
+    }
+
+    public boolean isUnion() {
+        boolean union = false;
+        int parentheses = 0;
+        for (char c : getContents().get(0).toCharArray()) {
+            if (c == '(') {
+                parentheses++;
+            } else if (c == ')') {
+                parentheses--;
+            } else if (c == 'U' && parentheses == 0) {
+                union = true;
+            }
+        }
+        return union;
+    }
+
+    public Regex clearAllDoneStatus(Regex root) {
+        root.setChildrenInsp(0);
+        root.setDone(false);
+        for (Regex child : root.getChildren()) {
+            root.setChildrenInsp(0);
+            root.setDone(false);
+            if (child.getChildren() != null && child.getChildren().size() > 0) {
+                clearAllDoneStatus(child);
+            }
+        }
+        return root;
     }
 }
